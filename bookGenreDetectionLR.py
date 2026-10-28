@@ -34,16 +34,12 @@ df = df[['Description', 'Category']]
 df = df.dropna(subset=['Description', 'Category'])
 
 # lowercase description & category data
-df = df['Description'].str.lower()
-df = df['Category'].str.lower()
+df['Description'] = df['Description'].str.lower()
+df['Category'] = df['Category'].str.lower()
 
 # remove extra whitespace
-df = df['Description'].str.replace(r'\s+', ' ', regex=True).str.strip()
-df = df['Category'].str.replace(r'\s+', ' ', regex=True).str.strip()
-
-# perform TF-IDF Vectorization on data
-from sklearn.feature_extraction.text import TfidfVectorizer
-
+df['Description'] = df['Description'].str.replace(r'\s+', ' ', regex=True).str.strip()
+df['Category'] = df['Category'].str.replace(r'\s+', ' ', regex=True).str.strip()
 
 #--------------------------------------------------------------------------------------------
 #                                 Logistic Regression
@@ -53,9 +49,15 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 import numpy as np
 
-# make target class label (y) and remaining features as input features (x) [except for song_title and artist]
-y = df['Category']
-x = df['Description']
+# perform TF-IDF Vectorization on data
+from sklearn.feature_extraction.text import TfidfVectorizer
+vectorizer = TfidfVectorizer()
+x_vectorized = vectorizer.fit_transform(df['Description'])
+
+# encode the target string data into numeric labels
+from sklearn.preprocessing import LabelEncoder
+label_encoder = LabelEncoder()
+y_encoded = label_encoder.fit_transform(df['Category'])
 
 # logistic regression model
 model = LogisticRegression(max_iter=1000)
@@ -64,7 +66,7 @@ model = LogisticRegression(max_iter=1000)
 cv_strategy = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
 
 # perform cross validation
-scores = cross_val_score(model, x, y, cv=cv_strategy, scoring="f1")
+scores = cross_val_score(model, x_vectorized, y_encoded, cv=cv_strategy, scoring="f1")
 
 # results
 print("F1 per fold:", scores)
