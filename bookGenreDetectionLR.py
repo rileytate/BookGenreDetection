@@ -32,3 +32,30 @@ df = df[['Description', 'Category']]
 
 # drop rows in dataset where value is null in description or genre column
 df_cleaned = df.dropna(subset=['Description', 'Category'])
+
+
+#--------------------------------------------------------------------------------------------
+#                                 Logistic Regression
+#--------------------------------------------------------------------------------------------
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import StratifiedKFold, cross_val_score
+import numpy as np
+
+# make target class label (y) and remaining features as input features (x) [except for song_title and artist]
+y = df['Category']
+x = df['Description']
+
+# logistic regression model
+model = LogisticRegression(max_iter=1000)
+
+# initialize 10-fold Stratified cross validation
+cv_strategy = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+
+# perform cross validation
+scores = cross_val_score(model, x, y, cv=cv_strategy, scoring="f1")
+
+# results
+print("F1 per fold:", scores)
+print(f"Mean F1: {np.mean(scores):.4f}")
+print(f"Standard Deviation: {np.std(scores):.4f}")
