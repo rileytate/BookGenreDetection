@@ -31,7 +31,18 @@ df = kagglehub.dataset_load(
 df = df[['Description', 'Category']]
 
 # drop rows in dataset where value is null in description or genre column
-df_cleaned = df.dropna(subset=['Description', 'Category'])
+df = df.dropna(subset=['Description', 'Category'])
+
+# lowercase description & category data
+df = df['Description'].str.lower()
+df = df['Category'].str.lower()
+
+# remove extra whitespace
+df = df['Description'].str.replace(r'\s+', ' ', regex=True).str.strip()
+df = df['Category'].str.replace(r'\s+', ' ', regex=True).str.strip()
+
+# perform TF-IDF Vectorization on data
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 #--------------------------------------------------------------------------------------------
