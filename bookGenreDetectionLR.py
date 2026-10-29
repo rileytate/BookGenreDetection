@@ -41,6 +41,11 @@ df['Category'] = df['Category'].str.lower()
 df['Description'] = df['Description'].str.replace(r'\s+', ' ', regex=True).str.strip()
 df['Category'] = df['Category'].str.replace(r'\s+', ' ', regex=True).str.strip()
 
+# Keep the 20 most common categories with enough examples for 10-fold CV
+counts = df["Category"].value_counts()
+categories = counts[counts >= 10].nlargest(20).index
+df = df[df["Category"].isin(categories)].copy()
+
 #--------------------------------------------------------------------------------------------
 #                                 Logistic Regression
 #--------------------------------------------------------------------------------------------
@@ -51,7 +56,7 @@ import numpy as np
 
 # perform TF-IDF Vectorization on data
 from sklearn.feature_extraction.text import TfidfVectorizer
-vectorizer = TfidfVectorizer()
+vectorizer = TfidfVectorizer(max_features=50_000, min_df=2)
 x_vectorized = vectorizer.fit_transform(df['Description'])
 
 # encode the target string data into numeric labels
@@ -66,7 +71,7 @@ model = LogisticRegression(max_iter=1000)
 cv_strategy = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
 
 # perform cross validation
-scores = cross_val_score(model, x_vectorized, y_encoded, cv=cv_strategy, scoring="f1")
+scores = cross_val_score(model, x_vectorized, y_encoded, cv=cv_strategy, scoring="f1_macro", n_jobs=1)
 
 # results
 print("F1 per fold:", scores)
