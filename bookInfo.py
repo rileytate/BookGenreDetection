@@ -1,34 +1,27 @@
 import pandas
 
 # Set the path to the file you'd like to load
-file_path = "BooksDatasetClean.csv"
+file_path = "data.csv"
 
 # Load CSV file
 df = pandas.read_csv(file_path)
 
-# drop all columns except for description and category
-df = df[['Description', 'Category']]
+# drop all columns except for summary and genre
+df = df[['summary', 'genre']]
 
-# drop rows in dataset where value is null in description or genre column
-df = df.dropna(subset=['Description', 'Category'])
+# drop rows in dataset where value is null in summary or genre column
+df = df.dropna(subset=['summary', 'genre'])
 
 # Turn the columns into a list
-book_categories = df['Category'].tolist()
+genres = df['genre'].tolist()
 
 # Store all the categories in a list
 categories = []
 
-for book in book_categories:
-    # Split the string
-    labels = book.split(' , ')
-
-    # Go through each label
-    for label in labels:
-        label = label.strip()
-
-        # Check if the label has been recorded
-        if label not in categories:
-            categories.append(label)
+for genre in genres:
+    # Check if the label has been recorded
+    if genre not in categories:
+        categories.append(genre)
 
 
 # Print the categories
